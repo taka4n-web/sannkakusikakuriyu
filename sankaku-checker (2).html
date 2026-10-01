@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>かたちの なかまを 見つけよう</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fdf3ec; --card:#ffffff; --ink:#3a2f2a; --sub:#8a7a70;
+    --pink:#ffd9e6; --blue:#cfe8ff; --mint:#d7f5df; --yellow:#fff3c4;
+    --lavender:#e4d6f7; --peach:#ffe0c2; --gold:#ffe9a8;
+    --accent:#ff8fb3; --accent2:#6fc7e0; --good:#5fb87a;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+    box-sizing:border-box;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#fdf3ec; --card:#ffffff; --ink:#3a2f2a; --sub:#8a7a70;
+  }}
+  :root[data-theme="dark"]{ --bg:#fdf3ec; --card:#ffffff; --ink:#3a2f2a; --sub:#8a7a70; }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'M PLUS Rounded 1c', sans-serif;
+    display:flex; justify-content:center;
+  }
+  .wrap{ width:100%; max-width:640px; padding:18px 16px 40px; }
+  header{ text-align:center; margin-bottom:10px; }
+  h1{ font-size:1.35rem; margin:6px 0 2px; }
+  .sub{ color:var(--sub); font-size:0.85rem; margin:0 0 6px; }
+  .mascot-row{ display:flex; align-items:center; justify-content:center; gap:10px; }
+  .progress{ background:#eee2d6; border-radius:20px; height:10px; overflow:hidden; margin:14px 0 18px; }
+  .progress-bar{ height:100%; background:var(--accent); border-radius:20px; transition:width .3s; }
+  .card{ background:var(--card); border-radius:22px; padding:20px; box-shadow:0 6px 0 #e9d9c8;
+    border:2px solid var(--ink); margin-bottom:16px; }
+  .shape-label{ text-align:center; font-size:1.1rem; font-weight:800; margin-bottom:4px;}
+  .shape-box{ display:flex; justify-content:center; margin:6px 0 14px; }
+  .qtext{ text-align:center; font-size:1.02rem; font-weight:700; margin:6px 0 12px;}
+  .btn-row{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  button{
+    font-family:inherit; font-size:.95rem; font-weight:700; border-radius:16px;
+    border:2px solid var(--ink); padding:9px 14px; background:var(--pink);
+    cursor:pointer; color:var(--ink); transition:transform .1s;
+  }
+  button:active{ transform:scale(.96); }
+  #judgeRow button.alt{ background:var(--blue); }
+  #judgeRow button.righttri{ background:var(--lavender); }
+  #judgeRow button.quad{ background:var(--mint); }
+  #judgeRow button.rect{ background:var(--peach); }
+  #judgeRow button.square{ background:var(--gold); }
+  #judgeRow button.sel{ outline:4px solid var(--ink); outline-offset:-3px; }
+  .mode-row button.sel, .reason.sel{ background:var(--accent2); color:#fff; }
+  button.reason{ background:var(--yellow); width:100%; text-align:left; margin:5px 0; font-size:.9rem; }
+  button:disabled{ opacity:.45; cursor:default; }
+  .reasons{ display:none; margin-top:10px; }
+  .reasons.show{ display:block; }
+  .mode-row{ display:none; gap:10px; justify-content:center; margin:12px 0 6px; }
+  .mode-row.show{ display:flex; }
+  .mode-row button{ background:#f4e9dc; padding:8px 14px; font-size:.9rem; }
+  .write-box{ display:none; margin-top:10px; }
+  .write-box.show{ display:block; }
+  .write-box textarea{
+    width:100%; min-height:80px; border-radius:14px; border:2px solid var(--ink);
+    font-family:inherit; font-size:1rem; padding:10px; resize:vertical;
+  }
+  .grade{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:40px; height:40px; border-radius:50%; font-size:1.4rem; font-weight:800;
+    border:2px solid var(--ink); flex:none;
+  }
+  .grade.g-perfect{ background:#ffe066; }
+  .grade.g-ok{ background:#c9f2d8; }
+  .grade.g-bad{ background:#ffd0c2; }
+  .checklist{ margin:8px 0 0; padding-left:0; list-style:none; font-size:.88rem; }
+  .checklist li{ margin:2px 0; }
+  .check-row{ text-align:center; margin-top:14px; }
+  .check-row button{ background:var(--mint); }
+  .feedback{
+    display:none; margin-top:14px; padding:14px; border-radius:16px; border:2px dashed var(--ink);
+    font-size:.95rem; line-height:1.5;
+  }
+  .feedback.show{ display:flex; gap:10px; align-items:flex-start; }
+  .feedback.good{ background:#eafaf0; }
+  .feedback.bad{ background:#fff1ec; }
+  .hint{ display:inline-block; margin-top:6px; font-size:.88rem; color:#a8672f; font-style:italic; }
+  .next-row{ text-align:center; margin-top:12px; }
+  .next-row button{ background:var(--accent); color:#fff; display:none; }
+  .next-row button.show{ display:inline-block; }
+  .score{ text-align:center; font-size:1.2rem; font-weight:800; margin:20px 0 6px; display:none; }
+  .score.show{ display:block; }
+  .restart{ display:none; text-align:center; margin-top:10px; }
+  .restart.show{ display:block; }
+  footer{ text-align:center; color:var(--sub); font-size:.76rem; margin-top:18px; }
+  svg{ display:block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mascot-row" id="mascotHead"></div>
+    <h1>かたちの なかまを 見つけよう！</h1>
+    <p class="sub">かたちを 見て、いちばん くわしい なまえを えらんでね</p>
+    <p class="sub">まっすぐな ところを「へん」、かどの てんを「ちょうてん」と いうよ。</p>
+  </header>
+
+  <div class="progress"><div class="progress-bar" id="bar" style="width:10%"></div></div>
+
+  <div class="card" id="quizCard">
+    <div class="shape-label" id="shapeLabel"></div>
+    <div class="shape-box" id="shapeBox"></div>
+
+    <div class="qtext">これは どんな かたちかな？</div>
+    <div class="btn-row" id="judgeRow">
+      <button id="btnTri">さんかくけい</button>
+      <button class="righttri" id="btnRightTri">ちょっかくさんかくけい</button>
+      <button class="quad" id="btnQuad">しかくけい</button>
+      <button class="rect" id="btnRect">ちょうほうけい</button>
+      <button class="square" id="btnSquare">せいほうけい</button>
+      <button class="alt" id="btnNot">ちがう かたち</button>
+    </div>
+
+    <div class="mode-row" id="modeRow">
+      <button id="modeSelect" class="sel">わけを えらぶ</button>
+      <button id="modeWrite">じぶんで かく</button>
+    </div>
+
+    <div class="reasons" id="reasonBox">
+      <div class="qtext">わけを えらんでね（いくつ えらんでも いいよ）</div>
+      <button class="reason" data-r="R1">へんが 三本 あるから</button>
+      <button class="reason" data-r="R3">ちょうてんが 三つ あるから</button>
+      <button class="reason" data-r="R7">三本の ちょくせんで かこまれた かたちだから</button>
+      <button class="reason" data-r="R9">ちょっかくの かどが あるから</button>
+      <button class="reason" data-r="R2">へんが 四本 あるから</button>
+      <button class="reason" data-r="R4">ちょうてんが 四つ あるから</button>
+      <button class="reason" data-r="R8">四本の ちょくせんで かこまれた かたちだから</button>
+      <button class="reason" data-r="R10">四つの かどが みんな ちょっかくに なっているから</button>
+      <button class="reason" data-r="R12">四つの かどが みんな ちょっかくに なっていないから</button>
+      <button class="reason" data-r="R11">四つの へんの ながさが みんな おなじだから</button>
+      <button class="reason" data-r="R5">ちょうてんが 五つ いじょう あるから</button>
+      <button class="reason" data-r="R6">まがっている ところが あって、まっすぐな へんに なっていないから</button>
+    </div>
+
+    <div class="write-box" id="writeBox">
+      <div class="qtext">わけを じぶんで かいてね</div>
+      <textarea id="writeInput" placeholder="れい：かどが 4つとも ちょっかくに なっているから..."></textarea>
+    </div>
+
+    <div class="check-row" id="checkRow" style="display:none;">
+      <button id="btnCheck">こたえを 見る</button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+    <div class="next-row"><button id="btnNext">つぎへ</button></div>
+  </div>
+
+  <div class="score" id="scoreBox"></div>
+  <div class="restart" id="restartBox"><button id="btnRestart">もう いちど やる</button></div>
+
+  <footer>２年生 さんすう「三角形と 四角形」より</footer>
+</div>
+
+<script>
+function rightAngleMark(x, y, dx, dy){
+  // dx/dy: 1 or -1 方向。ちょっかくの かどに 小さな しるしを つける
+  const s = 16;
+  return `M ${x} ${y-s*dy} L ${x+s*dx} ${y-s*dy} L ${x+s*dx} ${y} `;
+}
+function svgEl(viewBox, inner, bg, marker){
+  const m = marker ? `<path d="${marker}" fill="none" stroke="#3a2f2a" stroke-width="3"/>` : "";
+  return `<svg viewBox="${viewBox}" width="220" height="160">
+    <path d="${inner}" fill="${bg}" stroke="#3a2f2a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+    ${m}
+  </svg>`;
+}
+
+// judge: tri(さんかくけい) / righttri(ちょっかくさんかくけい) / quad(しかくけい) / rect(ちょうほうけい) / square(せいほうけい) / not(ちがう)
+const data = [
+ { id:"ア", judge:"righttri", reason:"RIGHTTRI", correctChoices:["R1","R3","R7","R9"], fill:"#ffe1a8",
+   path:"M 30 140 L 30 30 L 150 140 Z", marker:rightAngleMark(30,140,1,1),
+   good:"そのとおり！アは へんが 三本、ちょうてんが 三つの さんかくけいで、ちょっかくの かども あるから、ちょっかくさんかくけいだよ。",
+   hint:"かどを 一つずつ 見てみて。きちんと とがった ちょっかくの かどが あるかな？" },
+ { id:"イ", judge:"not", reason:"CURVE", correctChoices:["R6"], fill:"#cfe8ff",
+   path:"M 26 130 Q 40 60 110 20 Q 170 60 196 132 Q 110 150 26 130 Z",
+   good:"よく 見つけたね。イは まがっている ところが あって、まっすぐな へんに なっていないから、さんかくけいでも しかくけいでも ないよ。",
+   hint:"した の ところを ゆびで なぞってみて。まっすぐな へんに なっているかな？" },
+ { id:"ウ", judge:"quad", reason:"QUAD", correctChoices:["R2","R4","R8","R12"], fill:"#d7f5df",
+   path:"M 40 130 L 70 30 L 190 30 L 160 130 Z",
+   good:"そう！ウは へんが 四本、ちょうてんが 四つの しかくけいだよ。でも かどが ちょっかくじゃないから、ちょうほうけいでも せいほうけいでも ないよ。",
+   hint:"かどを 見てみて。4つとも ちょっかくに なっているかな？" },
+ { id:"エ", judge:"not", reason:"CURVE", correctChoices:["R6"], fill:"#ffd9e6",
+   path:"M 30 138 L 100 20 Q 175 45 194 130 Z",
+   good:"正かい！エは まがっている ところが あって、まっすぐな へんに なっていないから、さんかくけいでも しかくけいでも ないよ。",
+   hint:"みぎがわ の ところを よく 見てみて。まっすぐな 一本の へんに 見えるかな？" },
+ { id:"オ", judge:"not", reason:"CURVE", correctChoices:["R6"], fill:"#fff3c4",
+   path:"M 40 60 Q 20 40 45 25 Q 70 10 95 28 Q 130 8 150 30 Q 190 25 185 60 Q 205 90 175 105 Q 185 135 150 130 Q 120 155 95 132 Q 55 148 45 118 Q 15 100 40 60 Z",
+   good:"よく わかったね。オは まわり ぜんぶが くねくね まがっていて、まっすぐな へんが 一つも ないから、さんかくけいでも しかくけいでも ないよ。",
+   hint:"まわり ぜんぶを 見てみて。まっすぐな へんは あるかな？" },
+ { id:"カ", judge:"tri", reason:"TRI", correctChoices:["R1","R3","R7"], fill:"#ffd9e6",
+   path:"M 16 128 L 200 96 L 60 30 Z",
+   good:"やった！カは へんが 三本、ちょうてんが 三つの さんかくけいだよ。でも ちょっかくの かどが ないから、ちょっかくさんかくけいでは ないよ。",
+   hint:"かどを 見てみて。ちょっかくの かどは あるかな？" },
+ { id:"キ", judge:"not", reason:"PENTA", correctChoices:["R5"], fill:"#ffe1a8",
+   path:"M 60 20 L 150 26 L 190 90 L 130 140 L 40 118 Z",
+   good:"そのとおり！キは ちょうてんが 五つ あるから、さんかくけいでも しかくけいでも ないよ。",
+   hint:"ちょうてんを 一つずつ ゆびで さして かぞえてみて。いくつ あるかな？" },
+ { id:"ク", judge:"not", reason:"CURVE", correctChoices:["R6"], fill:"#cfe8ff",
+   path:"M 30 60 L 105 18 L 185 60 Q 110 100 30 60 Z",
+   good:"正かい！クは したの ところが まがっていて、まっすぐな へんに なっていないから、さんかくけいでも しかくけいでも ないよ。",
+   hint:"した の ところを ゆびで なぞってみて。まっすぐな へんに なっているかな？" },
+ { id:"ケ", judge:"rect", reason:"RECT", correctChoices:["R2","R4","R8","R10"], fill:"#ffe0c2",
+   path:"M 54 30 L 186 30 L 186 130 L 54 130 Z", marker:rightAngleMark(54,30,1,-1),
+   good:"せいかい！ケは へんが 四本、ちょうてんが 四つの しかくけいで、4つの かどが みんな ちょっかくだから、ちょうほうけいだよ。でも へんの ながさが ぜんぶ おなじじゃないから、せいほうけいでは ないよ。",
+   hint:"かどを 4つとも 見てみて。みんな ちょっかくに なっているかな？へんの ながさも くらべてみてね。" },
+ { id:"コ", judge:"square", reason:"SQUARE", correctChoices:["R2","R4","R8","R10","R11"], fill:"#ffe9a8",
+   path:"M 50 30 L 170 30 L 170 150 L 50 150 Z", marker:rightAngleMark(50,30,1,-1),
+   good:"ばっちり！コは かどが 4つとも ちょっかくで、へんの ながさも 4つとも おなじだから、せいほうけいだよ。せいほうけいは、ちょうほうけいの なかまでも あるよ。",
+   hint:"かどと、へんの ながさを 4つとも くらべてみてね。" },
+];
+
+const CHECKLISTS = {
+  TRI: [
+    { label:"「へん」「ちょうてん」「ちょくせん」の どれか", kw:["へん","辺","ちょうてん","頂点","ちょくせん","直線","囲"] },
+    { label:"三（三本・三つ）という かず", kw:["三本","3本","３本","三つ","3つ","３つ","みっつ"] },
+  ],
+  RIGHTTRI: [
+    { label:"「へん」「ちょうてん」「ちょくせん」の どれか", kw:["へん","辺","ちょうてん","頂点","ちょくせん","直線","囲"] },
+    { label:"三（三本・三つ）という かず", kw:["三本","3本","３本","三つ","3つ","３つ","みっつ"] },
+    { label:"「ちょっかく」という ことば", kw:["ちょっかく","直角"] },
+  ],
+  QUAD: [
+    { label:"「へん」「ちょうてん」「ちょくせん」の どれか", kw:["へん","辺","ちょうてん","頂点","ちょくせん","直線","囲"] },
+    { label:"四（四本・四つ）という かず", kw:["四本","4本","４本","四つ","4つ","４つ","よっつ"] },
+  ],
+  RECT: [
+    { label:"「へん」「ちょうてん」「ちょくせん」の どれか", kw:["へん","辺","ちょうてん","頂点","ちょくせん","直線","囲"] },
+    { label:"四（四本・四つ）という かず", kw:["四本","4本","４本","四つ","4つ","４つ","よっつ"] },
+    { label:"「ちょっかく」という ことば", kw:["ちょっかく","直角"] },
+  ],
+  SQUARE: [
+    { label:"「へん」「ちょうてん」「ちょくせん」の どれか", kw:["へん","辺","ちょうてん","頂点","ちょくせん","直線","囲"] },
+    { label:"四（四本・四つ）という かず", kw:["四本","4本","４本","四つ","4つ","４つ","よっつ"] },
+    { label:"「ちょっかく」という ことば", kw:["ちょっかく","直角"] },
+    { label:"「おなじ」ながさ という ことば", kw:["おなじ","同じ"] },
+  ],
+  PENTA: [
+    { label:"「ちょうてん」という ことば", kw:["ちょうてん","頂点"] },
+    { label:"五（五本・五つ）という かず", kw:["五つ","5つ","５つ","五本","5本","５本","いつつ"] },
+  ],
+  CURVE: [
+    { label:"「まがっている」という ことば", kw:["まが","曲"] },
+    { label:"「へん」という ことば", kw:["へん","辺"] },
+  ],
+};
+
+let mode = "select";
+let idx = 0, score = 0, chosenJudge = null, chosenReasons = new Set(), answered = false;
+
+function mascotSVG(mood){
+  let mouth = "M 34 46 Q 44 52 54 46";
+  if(mood==="happy") mouth = "M 32 44 Q 44 60 56 44";
+  if(mood==="sad") mouth = "M 32 52 Q 44 40 56 52";
+  return `<svg viewBox="0 0 88 88" width="56" height="56">
+    <circle cx="44" cy="44" r="38" fill="#fff3c4" stroke="#3a2f2a" stroke-width="4"/>
+    <circle cx="30" cy="38" r="3.2" fill="#3a2f2a"/>
+    <circle cx="56" cy="38" r="3.2" fill="#3a2f2a"/>
+    <path d="${mouth}" fill="none" stroke="#3a2f2a" stroke-width="3.5" stroke-linecap="round"/>
+  </svg>`;
+}
+document.getElementById("mascotHead").innerHTML = mascotSVG("neutral");
+
+const JUDGE_IDS = ["btnTri","btnRightTri","btnQuad","btnRect","btnSquare","btnNot"];
+const JUDGE_KEY = { btnTri:"tri", btnRightTri:"righttri", btnQuad:"quad", btnRect:"rect", btnSquare:"square", btnNot:"not" };
+
+function render(){
+  answered = false; chosenJudge = null; chosenReasons = new Set(); mode = "select";
+  const d = data[idx];
+  document.getElementById("bar").style.width = ((idx)/data.length*100+10)+"%";
+  document.getElementById("shapeLabel").textContent = d.id;
+  document.getElementById("shapeBox").innerHTML = svgEl("0 0 220 160", d.path, d.fill, d.marker);
+  document.getElementById("modeRow").classList.remove("show");
+  document.getElementById("modeSelect").className = "sel";
+  document.getElementById("modeWrite").className = "";
+  document.getElementById("reasonBox").classList.remove("show");
+  document.getElementById("writeBox").classList.remove("show");
+  document.getElementById("writeInput").value = "";
+  document.getElementById("checkRow").style.display = "none";
+  document.getElementById("feedback").className = "feedback";
+  document.getElementById("feedback").innerHTML = "";
+  document.getElementById("btnNext").classList.remove("show");
+  JUDGE_IDS.forEach(id=>{
+    const b = document.getElementById(id);
+    b.disabled = false;
+    b.classList.remove("sel");
+  });
+  document.querySelectorAll(".reason").forEach(b=>{ b.classList.remove("sel"); b.disabled=false; });
+  document.getElementById("writeInput").disabled = false;
+  document.getElementById("btnCheck").textContent = "こたえを 見る";
+}
+
+JUDGE_IDS.forEach(id=>{
+  document.getElementById(id).onclick = ()=>{
+    chosenJudge = JUDGE_KEY[id];
+    JUDGE_IDS.forEach(bid=> document.getElementById(bid).classList.toggle("sel", bid===id));
+    document.getElementById("modeRow").classList.add("show");
+    showModeArea();
+    document.getElementById("checkRow").style.display = "block";
+  };
+});
+
+function showModeArea(){
+  document.getElementById("reasonBox").classList.toggle("show", mode==="select");
+  document.getElementById("writeBox").classList.toggle("show", mode==="write");
+}
+document.getElementById("modeSelect").onclick = ()=>{
+  mode = "select";
+  document.getElementById("modeSelect").className = "sel";
+  document.getElementById("modeWrite").className = "";
+  showModeArea();
+};
+document.getElementById("modeWrite").onclick = ()=>{
+  mode = "write";
+  document.getElementById("modeWrite").className = "sel";
+  document.getElementById("modeSelect").className = "";
+  showModeArea();
+};
+document.querySelectorAll(".reason").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const r = btn.dataset.r;
+    if(chosenReasons.has(r)){ chosenReasons.delete(r); btn.classList.remove("sel"); }
+    else { chosenReasons.add(r); btn.classList.add("sel"); }
+  });
+});
+
+function gradeWriting(text, d){
+  const t = text.trim();
+  const items = [];
+  const judgeOk = (chosenJudge === d.judge);
+  items.push({ label:"はんてい（かたちの なまえが あっているか）", ok: judgeOk });
+  const checklist = CHECKLISTS[d.reason] || [];
+  checklist.forEach(c=>{
+    const ok = c.kw.some(k=>t.includes(k));
+    items.push({ label:c.label, ok });
+  });
+  const total = items.length;
+  const matched = items.filter(i=>i.ok).length;
+  let mark, cls, headline;
+  if(matched === total){ mark="◎"; cls="g-perfect"; headline="かんぺき！わけも ばっちり かけたね。"; }
+  else if(matched === 0){ mark="△"; cls="g-bad"; headline="うーん、もう いちど かんがえてみよう。"; }
+  else { mark="○"; cls="g-ok"; headline="おしい！もう すこしで かんぺきだよ。"; }
+  return { mark, cls, headline, items, matched, total };
+}
+
+document.getElementById("btnCheck").onclick = ()=>{
+  const d = data[idx];
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("good","bad");
+
+  if(mode === "select"){
+    if(!chosenJudge || chosenReasons.size===0) return;
+    const correctSet = new Set(d.correctChoices);
+    const sameSize = chosenReasons.size === correctSet.size;
+    const allMatch = sameSize && [...chosenReasons].every(r=>correctSet.has(r));
+    const correct = (chosenJudge === d.judge) && allMatch;
+    fb.classList.add("show", correct?"good":"bad");
+    document.getElementById("mascotHead").innerHTML = mascotSVG(correct?"happy":"sad");
+    if(correct){
+      if(!answered) score++;
+      answered = true;
+      fb.innerHTML = `${mascotSVG("happy")}<div>
+         <b>やったー！せいかいだよ！</b><br>
+         ${d.good}
+      </div>`;
+      JUDGE_IDS.forEach(id=> document.getElementById(id).disabled = true);
+      document.querySelectorAll(".reason").forEach(b=>b.disabled=true);
+      document.getElementById("checkRow").style.display = "none";
+      document.getElementById("btnNext").classList.add("show");
+    } else {
+      fb.innerHTML = `${mascotSVG("sad")}<div>
+         <b>おしいな。もう いちど えらんで、たしかめてみてね。</b><br>
+         <span class="hint">💡 ヒント：${d.hint}</span>
+      </div>`;
+    }
+    return;
+  }
+
+  const text = document.getElementById("writeInput").value;
+  if(!chosenJudge){ return; }
+  if(!text.trim()){ return; }
+  const g = gradeWriting(text, d);
+  fb.classList.add("show");
+  if(g.mark==="◎") fb.classList.add("good");
+  if(g.mark==="△") fb.classList.add("bad");
+  document.getElementById("mascotHead").innerHTML = mascotSVG(g.mark==="◎"?"happy":(g.mark==="△"?"sad":"neutral"));
+
+  const list = g.items.map(i=>`<li>${i.ok?"✅":"⬜"} ${i.label}</li>`).join("");
+  let extra = "";
+  if(g.mark==="◎"){ extra = d.good; }
+  else { extra = `<span class="hint">💡 ヒント：${d.hint}</span>`; }
+
+  fb.innerHTML = `<span class="grade ${g.cls}">${g.mark}</span><div>
+     <b>${g.headline}</b>
+     <ul class="checklist">${list}</ul>
+     ${extra}
+  </div>`;
+
+  document.getElementById("btnNext").classList.add("show");
+  if(g.mark === "◎"){
+    if(!answered) score++;
+    answered = true;
+    JUDGE_IDS.forEach(id=> document.getElementById(id).disabled = true);
+    document.getElementById("writeInput").disabled = true;
+    document.getElementById("checkRow").style.display = "none";
+  } else {
+    document.getElementById("btnCheck").textContent = "もういちど たしかめる";
+  }
+};
+
+document.getElementById("btnNext").onclick = ()=>{
+  idx++;
+  if(idx >= data.length){
+    document.getElementById("quizCard").style.display = "none";
+    document.getElementById("bar").style.width = "100%";
+    const box = document.getElementById("scoreBox");
+    box.classList.add("show");
+    box.textContent = `${data.length}もん中 ${score}もん せいかいだったよ！`;
+    document.getElementById("mascotHead").innerHTML = mascotSVG(score>=Math.ceil(data.length*0.7)?"happy":"neutral");
+    document.getElementById("restartBox").classList.add("show");
+  } else {
+    render();
+  }
+};
+document.getElementById("btnRestart").onclick = ()=>{
+  idx=0; score=0;
+  document.getElementById("quizCard").style.display = "block";
+  document.getElementById("scoreBox").classList.remove("show");
+  document.getElementById("restartBox").classList.remove("show");
+  render();
+};
+
+render();
+</script>
+</body>
+</html>
